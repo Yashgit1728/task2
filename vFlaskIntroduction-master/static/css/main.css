@@ -1,7 +1,9 @@
 body, html {
     margin: 0;
     font-family: sans-serif;
-    background-color: white;
+    background-color:rgb(193, 193, 118);
+    text-align: center;
+
 }
 
 .content {
@@ -43,10 +45,10 @@ body .form-container {
     align-items: center;
     width: 100%;
     height: auto;
-    background-color: cadetblue;
-    border-radius: 77px;
-    padding-bottom:15px
+    background-color: rgb(193, 193, 118);
+    padding-bottom:50px
 }
+
 
 input{
     width: 200px;
@@ -66,16 +68,31 @@ input[type="submit"] {
     cursor: pointer;
 }
 .table_style th{
-     background-color: white;
+     background-color: rgb(46, 12, 12);
      height:40px;
+     color:aliceblue
 }
 
 .table_style{
     width:90%;
 }
 .table_style tr:hover{
-    background-color: dimgray;
+    background-color: rgb(19, 1, 1);
+    color: #fff;
 }
+.btn {
+    padding: 10px 20px;
+    background-color: #01050a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    background-color: #0056b3;
+  }
 
 #del{
     background-color: black;

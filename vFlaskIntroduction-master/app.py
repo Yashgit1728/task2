@@ -2,6 +2,7 @@ from flask import Flask, render_template, url_for, request, redirect
 from models import db, Todo, Project
 import os
 from datetime import datetime
+from sqlalchemy import or_
 from flask import current_app
 from sqlalchemy import asc
 
@@ -38,8 +39,8 @@ def form():
     if request.method == 'POST':
         try:
             # Get form data
-            task = request.form['pTask']
-            category = request.form['task_type']
+            task = request.form['pName']
+            category = request.form['product_type']
             priority = int(request.form['pr'])
             due_date_str = request.form['due_date']
             file = request.files['file_upload']
@@ -49,11 +50,20 @@ def form():
             due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date()
 
             # Ensure UPLOAD_FOLDER is defined
-            UPLOAD_FOLDER = 'static/uploads'
-            app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-            # Save uploaded file
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            file.save(file_path)
+           
+            
+            file = request.files.get('file_upload')  # Use .get() to avoid KeyError
+            # Get the file from the form
+
+            if file and file.filename:
+             UPLOAD_FOLDER = os.path.join(current_app.root_path, 'static', 'uploads')
+             app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+             file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+             file.save(file_path)  # Check if a file is uploaded and has a valid filename
+            else:
+                file_path = None
+             
+    
 
             # Create a new project instance
             new_project = Project(
@@ -74,11 +84,13 @@ def form():
             return f'There was an issue adding your project: {e}'
 
     else:
+        search_query = request.args.get('search_query', '').strip()
+        sort_column = request.args.get('sort_column', 'task')
         # Fetch all projects to display
         sort_column = request.args.get('sort_column', 'task') 
 
         # Valid columns for sorting
-        valid_columns = ['task', 'category', 'due_date']
+        valid_columns = ['task', 'due_date']
 
         # Ensure sort_column is a valid column
         if sort_column not in valid_columns:
@@ -86,15 +98,23 @@ def form():
 
         # Build dynamic sort query (ascending only)
         sort_query = asc(getattr(Project, sort_column))
+        # Filter projects based on search query
+        if search_query:
+            # Filter projects by search query
+            projects = Project.query.filter(
+                or_(
+                    Project.task.ilike(f'%{search_query}%'),
+                    Project.category.ilike(f'%{search_query}%')
+                )
+            ).order_by(sort_query).all()
+        else:
+            # Fetch all projects if no search query
+             projects = Project.query.order_by(sort_query).all()
 
-        # Fetch all projects and sort
-        projects = Project.query.order_by(sort_query).all()
+        return render_template('/final_project/Form.html', 
+                               projects=projects, 
+                               search_query=search_query)
 
-        return render_template('/final_project/Form.html', projects=projects, sort_column=sort_column)
-
-
-
-# Delete and update paths
 
 @app.route('/delete/<int:id>')
 def delete(id):
@@ -107,7 +127,7 @@ def delete(id):
     except:
         return 'There was a problem deleting that task'
     
-@app.route('/delete_form/<int:id>', methods=['POST'])
+@app.route('/delete_form/<int:id>')
 def delete_project(id):
     project = Project.query.get_or_404(id)
     db.session.delete(project)
@@ -137,8 +157,8 @@ def Formupdate(id):
 
     if request.method == 'POST':
         # Update fields from the form
-        project.task = request.form['pTask']
-        project.category = request.form['task_type']
+        project.task = request.form['pName']
+        project.category = request.form['product_type']
         project.priority = int(request.form['pr'])
         project.due_date = datetime.strptime(request.form['due_date'], '%Y-%m-%d').date()
 

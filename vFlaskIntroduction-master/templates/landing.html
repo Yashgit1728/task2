@@ -1,11 +1,12 @@
 <!-- /assignment/templates/index.html -->
 {% extends 'base.html' %}
-{% block head %}<title>Landing Page</title>{% endblock %}
+{% block head %}<title>Home Page</title>{% endblock %}
 {% block body %}
-    <h1>Welcome to the Landing Page</h1>
-    <p>Choose a project to explore:</p>
-    <ul>
-        <li><a href="/assignment">Go to Task Master Project</a></li>
-        <li><a href="/final_project">Go to Final Project</a></li>
-    </ul>
+    <h1>Welcome to the Home Page</h1>
+    <h3>Choose a project to explore:</h3>
+ 
+        <a href="/assignment" style="padding-bottom: 10px;"><button class="btn">Go to Task Manager</button></a>
+        <a href="/final_project"><button class="btn">Go to Final Project</button></a>
+    
 {% endblock %}
+
